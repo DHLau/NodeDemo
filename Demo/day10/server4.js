@@ -1,6 +1,5 @@
 const express = require('express');
 const querystring = require('querystring');
-const expressStatic = require('express-static');
 const bodyParser = require('body-parser');
 
 var server = express();
