@@ -5,6 +5,11 @@ const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const consolidate = require('consolidate');
+const mysql = require('mysql');
+
+// 连接池
+const db = mysql.createPool({host:'localhost',user:'root',password:'liudh',database:'blob'});
+
 
 var server = express();
 server.listen(8080);
@@ -24,7 +29,6 @@ server.use(cookieSession({name:'ldhId',keys:arr,maxAge: 20 * 3600 * 1000}));
 server.use(bodyParser.urlencoded({extended:false}));
 server.use(multer({dest: './www/upload'}).any());
 
-
 // 用户请求
 server.use('/',function(req,res,next){
 	console.log(req.query,req.body,req.files,req.cookies,req.session);
@@ -35,17 +39,21 @@ server.use('/',function(req,res,next){
 // 输出什么东西
 server.set('view engine','html');
 // 读取文件在哪
-server.set('views','./views/');
+server.set('views','./template');
 // 哪种模板引擎
 server.engine('html',consolidate.ejs);
 
-server.get('/index',function(req,res){
-	// if (reg.session.userid) {
-	// 	res.render('1.ejs',{name:'ldh'});
-	// } else {
-	// 	res.render('login.ejs',{})
-	// }
-	res.render('1.ejs',{name:'ldh'});
+server.get('/',(req,res)=>{
+	// 查询banner东西
+	db.query("SELECT * FROM banner_table",(err,data)=>{
+		if (err) {
+			console.log(err);
+			res.status(500).send('database error').end();
+		} else {
+			console.log(data);
+			res.render('index.ejs',{banners:data});
+		}
+	});
 });
 
 // 4.static数据
